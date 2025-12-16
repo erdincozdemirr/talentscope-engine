@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from talentscope.core.normalize import norm
 from talentscope.core.scoring import compute_job_match, detect_job_domains, score_domains
-from talentscope.io.extractors import extract_resume_text
+from talentscope.core.experience import estimate_experience_years
+from talentscope.core.hr_scorer import HRScorer
+from talentscope.io.extractors import extract_file_content, extract_resume_text
 from talentscope.io.salary import load_salary_map_csv
 from talentscope.skills.skills_loader import load_yaml
 
@@ -48,7 +50,7 @@ def scan_pool(
 ) -> Dict[str, Any]:
     cfg = load_yaml(skills_yaml)
 
-    job_text_raw = Path(job_file).read_text(encoding="utf-8", errors="ignore")
+    job_text_raw = extract_file_content(job_file)
     job_text_norm = norm(job_text_raw)
 
     job_domains = detect_job_domains(job_text_norm, cfg)
@@ -100,13 +102,63 @@ def scan_pool(
         sal = salary_map.get(fname, {"min": None, "max": None})
         salary_min = sal.get("min")
         salary_max = sal.get("max")
+        salary_expectation_val = str(salary_min) if salary_min else None
+        
         salary_known = isinstance(salary_min, (int, float)) and isinstance(salary_max, (int, float))
         salary_mid = round((salary_min + salary_max) / 2.0, 2) if salary_known else None
+
+        exp_years = estimate_experience_years(raw)
+
+        # Prepare data for HR Scorer
+        # Need "parsed" data structure which comes from CVParser (but here we only have raw text)
+        # We need to run CVParser here to feed HRScorer properly
+        from talentscope.core.parser import CVParser
+        parser = CVParser(raw)
+        parsed_data = parser.parse()
+        
+        # Skill injection logic similar to API (simplified)
+        # Note: HRScorer needs skills to be in parsed_data["skills"] potentially, 
+        # or it uses matches from compute_job_match.
+        # HRScorer uses "top_matched_terms" from cv_data for evidence check.
+        
+        cv_data_for_hr = {
+            "raw_text": raw,
+            "parsed_data": parsed_data,
+            "estimated_experience": exp_years,
+            "top_matched_terms": [(t, w) for (t, w, _) in jm["matched_terms"]],
+            "salary": salary_expectation_val, # Passed from somewhere else or parsed?
+            # Actually we utilize "salary_min/max" from map
+        }
+        
+        # Update salary in parsed data if known
+        if salary_known:
+             if salary_min == salary_max:
+                 parsed_data["salary"] = salary_min
+             else:
+                 parsed_data["salary"] = f"{salary_min}-{salary_max}"
+
+        # Job Data for Scorer
+        # We need to pass job requirements (experience, salary limits if any)
+        # Currently scan_pool params don't have exp limits, but we can pass generic defaults
+        job_data_for_hr = {
+            "title": Path(job_file).stem.replace("_", " "), # Guess title from filename
+            "min_experience": 2, # Default
+            "max_experience": 6, # Default 
+            "min_salary": None,
+            "max_salary": None
+        }
+
+        scorer = HRScorer(job_data_for_hr)
+        hr_score_res = scorer.score(cv_data_for_hr)
 
         results.append(
             {
                 "candidate_id": candidate_id,
                 "candidate_file": fname,
+                "estimated_experience": exp_years,
+                "hr_score": hr_score_res["total_score"],
+                "hr_score_details": hr_score_res["breakdown"],
+                "hr_analysis": hr_score_res["details"],
                 "job_domains": [{"domain": d, "label": cfg["domains"][d].get("label", d)} for d in job_domains],
                 "overall_cv_score": overall_cv_score,
                 "domain_cv_score_for_job": domain_cv_score_for_job,
@@ -124,8 +176,9 @@ def scan_pool(
     known = [r for r in results if r["salary_known"]]
     unknown = [r for r in results if not r["salary_known"]]
 
-    known.sort(key=lambda x: (-x["job_fit_score"], -x["overall_cv_score"], *_salary_mid_sort_key(x)))
-    unknown.sort(key=lambda x: (-x["job_fit_score"], -x["overall_cv_score"]))
+    # Sort primarily by HR Score
+    known.sort(key=lambda x: (-x["hr_score"], -x["job_fit_score"], *_salary_mid_sort_key(x)))
+    unknown.sort(key=lambda x: (-x["hr_score"], -x["job_fit_score"]))
 
     known_top = known[:top_n]
     unknown_top = unknown[:top_n]

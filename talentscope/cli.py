@@ -16,7 +16,7 @@ def _default_out_path(results_dir: str, job_file: str) -> Path:
 def main():
     p = argparse.ArgumentParser(description="TalentScope: CV–Job matching and candidate ranking engine.")
     p.add_argument("--pool", required=True, help="CV folder path (.pdf/.docx)")
-    p.add_argument("--job", required=True, help="Job description text file path")
+    p.add_argument("--job", required=True, help="Job description file path (.txt/.pdf/.docx)")
     p.add_argument("--skills", required=True, help="skills.yaml path")
     p.add_argument("--salaries", default=None, help="salaries.csv path (optional)")
     p.add_argument("--min-fit", type=float, default=30.0, help="Reject if job_fit_score < this")

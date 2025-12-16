@@ -1,106 +1,377 @@
 domains:
   backend_java:
-    label: "Backend Developer (Java / Microservices)"
+    label: "Backend Developer (Java)"
     items:
+      # --- JAVA CORE & TOOLS ---
       - canonical: "java"
         kind: token
+        weight: 10
+        synonyms: ["java 8", "java 11", "java 17", "java se", "core java", "j2se", "jdk", "open jdk", "oracle jdk", "jvm"]
+
+      - canonical: "oop"
+        kind: token
         weight: 6
-        synonyms: ["jdk", "java 8", "java 11", "java 17", "core java"]
+        synonyms: ["encapsulation", "inheritance", "polymorphism", "abstraction", "object oriented programming"]
+
+      - canonical: "ide"
+        kind: token
+        weight: 1
+        synonyms: ["intellij idea", "eclipse ide", "eclipse"]
+
+      - canonical: "build tools"
+        kind: phrase
+        weight: 3
+        synonyms: ["maven", "gradle"]
+
+      - canonical: "version control"
+        kind: phrase
+        weight: 3
+        synonyms: ["git", "github", "gitlab", "bitbucket"]
+
+      - canonical: "java concepts"
+        kind: phrase
+        weight: 5
+        synonyms: ["collections framework", "java streams", "lambda expressions", "concurrency", "multithreading", "exception handling", "generics"]
+
+      # --- SPRING FRAMEWORK ---
+      - canonical: "spring framework"
+        kind: phrase
+        weight: 8
+        synonyms: ["spring core", "spring mvc", "spring context"]
 
       - canonical: "spring boot"
         kind: phrase
         weight: 10
-        synonyms: ["springboot", "spring_boot", "spring boot 2", "spring boot 3"]
+        synonyms: ["springboot", "spring_boot"]
+
+      - canonical: "spring security"
+        kind: phrase
+        weight: 7
+        synonyms: ["spring-security", "oauth2", "jwt", "json web token", "authorization"]
+
+      - canonical: "spring data"
+        kind: phrase
+        weight: 7
+        synonyms: ["spring data jpa", "jpa", "hibernate", "orm", "spring data hibernate"]
+
+      - canonical: "web services"
+        kind: phrase
+        weight: 6
+        synonyms: ["restful web services", "rest api", "rest", "crud", "xml", "json"]
+
+      - canonical: "design patterns"
+        kind: phrase
+        weight: 5
+        synonyms: ["singleton", "factory", "observer", "solid principles", "solid"]
+
+      - canonical: "sdlc"
+        kind: token
+        weight: 2
+        synonyms: ["software development life cycle", "agile", "scrum"]
+
+      - canonical: "tomcat"
+        kind: token
+        weight: 3
+        synonyms: ["apache tomcat", "embedded tomcat"]
+
+      # --- MICROSERVICES & CLOUD ---
+      - canonical: "microservices"
+        kind: token
+        weight: 10
+        synonyms: ["microservice architecture", "distributed systems"]
 
       - canonical: "spring cloud"
         kind: phrase
         weight: 8
-        synonyms: ["springcloud"]
+        synonyms: ["spring cloud config", "config server", "spring cloud gateway", "api gateway", "open feign", "feign client", "spring cloud circuit breaker", "resilience4j", "circuit breaker"]
 
-      - canonical: "spring cloud gateway"
-        kind: phrase
-        weight: 9
-        synonyms: ["spring gateway", "cloud gateway"]
-
-      - canonical: "microservices"
+      - canonical: "messaging"
         kind: token
-        weight: 10
-        synonyms: ["microservice", "micro-service", "distributed systems"]
-
-      - canonical: "rest api"
-        kind: phrase
         weight: 6
-        synonyms: ["restful api", "rest", "api development"]
+        synonyms: ["rabbitmq", "apache kafka", "kafka"]
 
-      - canonical: "hibernate"
+      - canonical: "observability"
         kind: token
         weight: 5
-        synonyms: ["jpa", "jakarta persistence", "hibernate orm"]
+        synonyms: ["zipkin", "sleuth", "spring cloud sleuth", "dynatrace", "logstash", "elasticsearch", "kibana", "elk stack"]
 
-      - canonical: "postgresql"
+      - canonical: "nosql"
+        kind: token
+        weight: 5
+        synonyms: ["redis", "mongodb", "cassandra"]
+
+      - canonical: "containerization"
+        kind: token
+        weight: 5
+        synonyms: ["docker", "kubernetes", "k8s"]
+
+      - canonical: "nexus"
+        kind: token
+        weight: 2
+        synonyms: ["sonatype nexus", "artifactory"]
+
+  backend_csharp:
+    label: "Backend Developer (.NET / C#)"
+    items:
+      - canonical: ".net"
+        kind: token
+        weight: 6
+        synonyms: ["dotnet", ".net framework"]
+
+      - canonical: ".net core"
+        kind: phrase
+        weight: 8
+        synonyms: ["asp.net core", "asp net core", "asp_net_core", "net core"]
+
+      - canonical: "c#"
+        kind: token
+        weight: 6
+        synonyms: ["c sharp", "csharp"]
+
+      - canonical: "entity framework"
+        kind: phrase
+        weight: 5
+        synonyms: ["ef core", "entity framework core", "linq"]
+
+      - canonical: "asp.net"
+        kind: phrase
+        weight: 6
+        synonyms: ["asp net", "asp_net", "asp.net mvc", "web api"]
+
+      - canonical: "sql server"
+        kind: phrase
+        weight: 4
+        synonyms: ["mssql", "t-sql"]
+
+      - canonical: "azure"
+        kind: token
+        weight: 5
+        synonyms: ["microsoft azure", "azure devops"]
+
+  frontend_developer:
+    label: "Frontend Developer"
+    items:
+      - canonical: "javascript"
+        kind: token
+        weight: 10
+        synonyms: ["js", "es6", "ecmascript"]
+
+      - canonical: "typescript"
+        kind: token
+        weight: 9
+        synonyms: ["ts"]
+
+      - canonical: "react"
+        kind: token
+        weight: 10
+        synonyms: ["reactjs", "react.js"]
+
+      - canonical: "angular"
+        kind: token
+        weight: 9
+        synonyms: ["angularjs", "angular.js"]
+
+      - canonical: "vue"
+        kind: token
+        weight: 9
+        synonyms: ["vuejs", "vue.js", "vue 3"]
+
+      - canonical: "html"
+        kind: token
+        weight: 5
+        synonyms: ["html5"]
+
+      - canonical: "css"
+        kind: token
+        weight: 5
+        synonyms: ["css3", "sass", "scss", "less", "bootstrap", "tailwind"]
+
+      - canonical: "redux"
         kind: token
         weight: 4
-        synonyms: ["postgres", "postgre"]
+        synonyms: ["redux toolkit", "context api", "state management", "vuex", "pinia"]
 
-      - canonical: "mysql"
-        kind: token
+      - canonical: "frontend tools"
+        kind: phrase
         weight: 3
-        synonyms: ["mariadb"]
+        synonyms: ["webpack", "vite", "npm", "yarn", "eslint", "prettier"]
 
-      - canonical: "mongodb"
+      - canonical: "nextjs"
         kind: token
-        weight: 3
-        synonyms: ["mongo"]
+        weight: 7
+        synonyms: ["next.js"]
 
-      - canonical: "redis"
+  ai_engineer:
+    label: "AI / ML Engineer"
+    items:
+      - canonical: "python"
         kind: token
-        weight: 4
-        synonyms: ["redis cache", "redis cluster"]
+        weight: 10
+        synonyms: ["python 3"]
+
+      - canonical: "machine learning"
+        kind: phrase
+        weight: 9
+        synonyms: ["ml", "scikit-learn", "sklearn"]
+
+      - canonical: "deep learning"
+        kind: phrase
+        weight: 9
+        synonyms: ["neural networks", "dl"]
+
+      - canonical: "tensorflow"
+        kind: token
+        weight: 8
+        synonyms: ["tf", "keras"]
+
+      - canonical: "pytorch"
+        kind: token
+        weight: 8
+        synonyms: ["torch"]
+
+      - canonical: "nlp"
+        kind: token
+        weight: 7
+        synonyms: ["natural language processing", "spacy", "nltk", "transformers", "huggingface", "llm", "large language models"]
+
+      - canonical: "computer vision"
+        kind: phrase
+        weight: 7
+        synonyms: ["opencv", "cv", "vision"]
+
+      - canonical: "data analysis"
+        kind: phrase
+        weight: 6
+        synonyms: ["pandas", "numpy", "matplotlib", "seaborn"]
+
+      - canonical: "mlops"
+        kind: token
+        weight: 5
+        synonyms: ["ml flow", "model deployment"]
+
+  data_engineer:
+    label: "Data Engineer"
+    items:
+      - canonical: "sql"
+        kind: token
+        weight: 9
+        synonyms: ["pl/sql", "t-sql"]
+
+      - canonical: "python"
+        kind: token
+        weight: 8
+        synonyms: []
+
+      - canonical: "big data"
+        kind: phrase
+        weight: 8
+        synonyms: ["hadoop", "hdfs", "mapreduce"]
+
+      - canonical: "spark"
+        kind: token
+        weight: 9
+        synonyms: ["apache spark", "pyspark"]
+
+      - canonical: "etl"
+        kind: token
+        weight: 7
+        synonyms: ["extract transform load", "data pipelines", "airflow"]
+
+      - canonical: "data warehouse"
+        kind: phrase
+        weight: 6
+        synonyms: ["snowflake", "bigquery", "redshift"]
 
       - canonical: "kafka"
         kind: token
+        weight: 6
+        synonyms: ["streaming"]
+
+      - canonical: "scala"
+        kind: token
         weight: 5
-        synonyms: ["apache kafka", "kafka streams"]
+        synonyms: []
 
-      - canonical: "rabbitmq"
+  devops_engineer:
+    label: "DevOps Engineer"
+    items:
+      - canonical: "ci/cd"
         kind: token
-        weight: 4
-        synonyms: ["rabbit mq"]
+        weight: 9
+        synonyms: ["cicd", "continuous integration", "continuous deployment", "jenkins", "gitlab ci", "github actions", "circleci"]
 
-      - canonical: "docker"
+      - canonical: "containerization"
         kind: token
-        weight: 4
-        synonyms: ["dockerfile", "docker compose", "docker-compose"]
+        weight: 9
+        synonyms: ["docker", "containerd"]
 
-      - canonical: "kubernetes"
+      - canonical: "orchestration"
         kind: token
-        weight: 4
-        synonyms: ["k8s"]
+        weight: 9
+        synonyms: ["kubernetes", "k8s", "helm", "openshift"]
 
-      - canonical: "jenkins"
+      - canonical: "iac"
         kind: token
-        weight: 3
-        synonyms: ["ci/cd", "cicd", "pipeline"]
+        weight: 8
+        synonyms: ["infrastructure as code", "terraform", "ansible", "cloudformation", "chef", "puppet"]
 
-      - canonical: "grpc"
+      - canonical: "cloud"
         kind: token
-        weight: 2
-        synonyms: ["protocol buffers", "protobuf"]
+        weight: 8
+        synonyms: ["aws", "amazon web services", "azure", "gcp", "google cloud"]
 
-      - canonical: "oauth2"
+      - canonical: "linux"
         kind: token
-        weight: 3
-        synonyms: ["oauth 2", "openid connect", "oidc"]
+        weight: 7
+        synonyms: ["bash", "shell scripting", "ubuntu", "centos"]
 
-      - canonical: "spring security"
+      - canonical: "monitoring"
+        kind: token
+        weight: 6
+        synonyms: ["prometheus", "grafana", "elk", "datadog", "new relic"]
+
+  qa_tester:
+    label: "QA / Test Engineer"
+    items:
+      - canonical: "test automation"
+        kind: phrase
+        weight: 9
+        synonyms: ["automated testing", "automation testing"]
+
+      - canonical: "selenium"
+        kind: token
+        weight: 8
+        synonyms: ["selenium webdriver"]
+
+      - canonical: "manual testing"
         kind: phrase
         weight: 6
-        synonyms: ["spring-security"]
+        synonyms: ["functional testing", "exploratory testing"]
 
-      - canonical: "unit testing"
+      - canonical: "api testing"
         kind: phrase
-        weight: 3
-        synonyms: ["junit", "junit5", "mockito", "integration testing", "testcontainers"]
+        weight: 7
+        synonyms: ["postman", "rest assured", "soapui"]
+
+      - canonical: "mobile testing"
+        kind: phrase
+        weight: 6
+        synonyms: ["appium"]
+
+      - canonical: "cypress"
+        kind: token
+        weight: 7
+        synonyms: ["playwright"]
+
+      - canonical: "bug tracking"
+        kind: phrase
+        weight: 4
+        synonyms: ["jira", "bugzilla", "defect management"]
+
+      - canonical: "load testing"
+        kind: phrase
+        weight: 5
+        synonyms: ["jmeter", "k6", "performance testing"]
 
   business_analyst:
     label: "Business Analyst"
@@ -139,31 +410,3 @@ domains:
         kind: token
         weight: 2
         synonyms: ["confluence", "backlog"]
-
-  dotnet_dev:
-    label: ".NET Developer"
-    items:
-      - canonical: ".net"
-        kind: token
-        weight: 6
-        synonyms: ["dotnet"]
-
-      - canonical: ".net core"
-        kind: phrase
-        weight: 8
-        synonyms: ["asp.net core", "asp net core", "asp_net_core", "net core"]
-
-      - canonical: "c#"
-        kind: token
-        weight: 6
-        synonyms: ["c sharp"]
-
-      - canonical: "entity framework"
-        kind: phrase
-        weight: 5
-        synonyms: ["ef core", "entity framework core"]
-
-      - canonical: "asp.net"
-        kind: phrase
-        weight: 6
-        synonyms: ["asp net", "asp_net"]

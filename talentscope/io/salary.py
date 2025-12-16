@@ -78,3 +78,15 @@ def load_salary_map_csv(path: Optional[str]) -> Dict[str, Dict[str, Optional[flo
             mp[fname] = {"min": sal_min, "max": sal_max}
 
     return mp
+
+
+def append_salary_to_csv(csv_path: Path, filename: str, salary_input: str) -> None:
+    """Appends filename and salary input (raw string) to the CSV."""
+    file_exists = csv_path.exists()
+    
+    with csv_path.open("a", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["filename", "salary_tl"])
+        
+        writer.writerow([filename, salary_input])

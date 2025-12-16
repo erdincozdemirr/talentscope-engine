@@ -1,0 +1,123 @@
+Metadata-Version: 2.4
+Name: talentscope-engine
+Version: 0.1.0
+Summary: Phrase-aware CV–Job matching and candidate ranking engine with salary-aware ordering.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: pdfminer.six>=20221105
+Requires-Dist: python-docx>=1.1.0
+Dynamic: license-file
+
+# TalentScope Engine
+
+**TalentScope** is a phrase-aware, explainable CV–Job matching and candidate ranking engine designed for
+transparent, domain-specific, and salary-aware hiring decisions.
+
+TalentScope is **not** a traditional resume scanner.  
+It is a **decision-support engine** that aligns CVs with job descriptions using canonical skill
+normalization, phrase-first matching, and domain-aware scoring — producing auditable, API-ready JSON outputs.
+
+The system is designed from day one to be exposed via **FastAPI**, enabling CV ingestion, salary data
+management, job description uploads, and ranked candidate retrieval through REST APIs.
+
+---
+
+## ✨ Core Capabilities
+
+### 🔍 Phrase-First Skill Matching
+- Multi-word phrases (e.g. **“Spring Cloud Gateway”**) are matched before tokens.
+- Prevents incorrect scoring from partial matches (`gateway` alone does not score).
+
+### 🧠 Canonical Normalization & Synonyms
+- Multiple spellings map to a single canonical skill:
+  - `spring boot` ≈ `springboot` ≈ `spring_boot`
+  - `ASP.NET Core` ≈ `.NET Core`
+- Canonical definitions are centralized in `skills.yaml`.
+
+### 🛡️ Boundary-Safe Matching
+- Regex word-boundary based matching prevents false positives:
+  - `java` ≠ `javascript`
+  - `sql` ≠ `postgresql`
+- Underscore (`_`) is treated as a word character, supporting CV styles like `spring_boot`.
+
+### 🎯 Job-Driven Domain Scoring
+- Job descriptions determine **which domains are evaluated**.
+- CVs are scored **only for domains relevant to the selected job**.
+
+### 📊 Transparent & Explainable Scoring
+- Every score is deterministic and explainable.
+- Output includes:
+  - matched skills
+  - missing skills
+  - per-domain scores
+  - overall CV score
+
+### 💰 Salary-Aware Candidate Ranking
+- Supports:
+  - fixed salary expectations
+  - salary ranges (e.g. 80k–90k)
+- Uses midpoint calculation: salary_mid = (min + max) / 2
+
+- Ranking favors:
+1. Higher job-fit score
+2. Higher overall CV score
+3. Lower salary expectation
+
+---
+
+## 🧩 What TalentScope Is (and Is Not)
+
+### ✅ What it is
+- Explainable CV–Job matching engine
+- Deterministic, auditable, and rule-based
+- Designed for backend & enterprise HR systems
+
+### ❌ What it is not
+- Not a black-box ML system
+- Not dependent on labeled training data
+- Not a keyword counter
+
+---
+
+🚦 Threshold Logic
+
+Candidates with: job_fit_score < 75%  are automatically rejected.
+
+Only candidates relevant to the selected job domain are returned.
+
+---
+
+🧪 Versions & Roadmap
+
+v1 — Deterministic Matching (Current)
+Phrase-aware skill extraction
+-Canonical normalization
+-Salary-aware ranking
+-JSON outputs
+-No ML / No DL
+
+v2 — NLP-Based CV Tagging
+-Resume section detection
+-Lemmatization & classic NLP tagging
+-Skill discovery suggestions
+
+v3 — Deep Learning Augmentation
+-Transformer-based semantic similarity
+-Hybrid scoring (rule-based core + DL bonus)
+-Deep learning as optional assist layer
+
+---
+
+👤 Author
+
+Erdinc Ozdemir
+Software Engineer
+
+---
+
+⭐ Final Note
+
+TalentScope is built on the principle that hiring systems must be transparent, fair, and controllable.
+It is designed to scale from a local engine to a production-grade API-driven hiring platform.

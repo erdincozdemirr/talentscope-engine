@@ -30,11 +30,27 @@ def extract_text_from_docx(path: Path) -> str:
         return ""
 
 
-def extract_resume_text(file_path: str) -> str:
+
+def extract_text_from_txt(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        return ""
+
+
+def extract_file_content(file_path: str) -> str:
     p = Path(file_path)
     suf = p.suffix.lower()
     if suf == ".pdf":
         return extract_text_from_pdf(p)
     if suf == ".docx":
         return extract_text_from_docx(p)
-    raise ValueError(f"Unsupported file type: {suf}. Only .pdf and .docx are supported.")
+    if suf == ".txt":
+        return extract_text_from_txt(p)
+    raise ValueError(f"Unsupported file type: {suf}. Only .pdf, .docx, and .txt are supported.")
+
+
+def extract_resume_text(file_path: str) -> str:
+    """Wrapper for backward compatibility, though extract_file_content covers all."""
+    return extract_file_content(file_path)
+
