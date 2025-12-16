@@ -1,0 +1,169 @@
+domains:
+  backend_java:
+    label: "Backend Developer (Java / Microservices)"
+    items:
+      - canonical: "java"
+        kind: token
+        weight: 6
+        synonyms: ["jdk", "java 8", "java 11", "java 17", "core java"]
+
+      - canonical: "spring boot"
+        kind: phrase
+        weight: 10
+        synonyms: ["springboot", "spring_boot", "spring boot 2", "spring boot 3"]
+
+      - canonical: "spring cloud"
+        kind: phrase
+        weight: 8
+        synonyms: ["springcloud"]
+
+      - canonical: "spring cloud gateway"
+        kind: phrase
+        weight: 9
+        synonyms: ["spring gateway", "cloud gateway"]
+
+      - canonical: "microservices"
+        kind: token
+        weight: 10
+        synonyms: ["microservice", "micro-service", "distributed systems"]
+
+      - canonical: "rest api"
+        kind: phrase
+        weight: 6
+        synonyms: ["restful api", "rest", "api development"]
+
+      - canonical: "hibernate"
+        kind: token
+        weight: 5
+        synonyms: ["jpa", "jakarta persistence", "hibernate orm"]
+
+      - canonical: "postgresql"
+        kind: token
+        weight: 4
+        synonyms: ["postgres", "postgre"]
+
+      - canonical: "mysql"
+        kind: token
+        weight: 3
+        synonyms: ["mariadb"]
+
+      - canonical: "mongodb"
+        kind: token
+        weight: 3
+        synonyms: ["mongo"]
+
+      - canonical: "redis"
+        kind: token
+        weight: 4
+        synonyms: ["redis cache", "redis cluster"]
+
+      - canonical: "kafka"
+        kind: token
+        weight: 5
+        synonyms: ["apache kafka", "kafka streams"]
+
+      - canonical: "rabbitmq"
+        kind: token
+        weight: 4
+        synonyms: ["rabbit mq"]
+
+      - canonical: "docker"
+        kind: token
+        weight: 4
+        synonyms: ["dockerfile", "docker compose", "docker-compose"]
+
+      - canonical: "kubernetes"
+        kind: token
+        weight: 4
+        synonyms: ["k8s"]
+
+      - canonical: "jenkins"
+        kind: token
+        weight: 3
+        synonyms: ["ci/cd", "cicd", "pipeline"]
+
+      - canonical: "grpc"
+        kind: token
+        weight: 2
+        synonyms: ["protocol buffers", "protobuf"]
+
+      - canonical: "oauth2"
+        kind: token
+        weight: 3
+        synonyms: ["oauth 2", "openid connect", "oidc"]
+
+      - canonical: "spring security"
+        kind: phrase
+        weight: 6
+        synonyms: ["spring-security"]
+
+      - canonical: "unit testing"
+        kind: phrase
+        weight: 3
+        synonyms: ["junit", "junit5", "mockito", "integration testing", "testcontainers"]
+
+  business_analyst:
+    label: "Business Analyst"
+    items:
+      - canonical: "requirements"
+        kind: token
+        weight: 5
+        synonyms: ["requirement gathering", "elicitation"]
+
+      - canonical: "user stories"
+        kind: phrase
+        weight: 5
+        synonyms: ["story writing", "acceptance criteria"]
+
+      - canonical: "acceptance criteria"
+        kind: phrase
+        weight: 6
+        synonyms: ["definition of done"]
+
+      - canonical: "uml"
+        kind: token
+        weight: 3
+        synonyms: ["use case", "sequence diagram", "activity diagram"]
+
+      - canonical: "bpmn"
+        kind: token
+        weight: 4
+        synonyms: ["process modeling", "workflow"]
+
+      - canonical: "stakeholder"
+        kind: token
+        weight: 3
+        synonyms: ["stakeholders"]
+
+      - canonical: "jira"
+        kind: token
+        weight: 2
+        synonyms: ["confluence", "backlog"]
+
+  dotnet_dev:
+    label: ".NET Developer"
+    items:
+      - canonical: ".net"
+        kind: token
+        weight: 6
+        synonyms: ["dotnet"]
+
+      - canonical: ".net core"
+        kind: phrase
+        weight: 8
+        synonyms: ["asp.net core", "asp net core", "asp_net_core", "net core"]
+
+      - canonical: "c#"
+        kind: token
+        weight: 6
+        synonyms: ["c sharp"]
+
+      - canonical: "entity framework"
+        kind: phrase
+        weight: 5
+        synonyms: ["ef core", "entity framework core"]
+
+      - canonical: "asp.net"
+        kind: phrase
+        weight: 6
+        synonyms: ["asp net", "asp_net"]

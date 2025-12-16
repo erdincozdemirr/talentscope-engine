@@ -1,0 +1,21 @@
+# --- Core ---
+## python>=3.10
+pdfminer.six>=20221105
+
+# --- Text & Parsing ---
+regex>=2023.12.25
+PyYAML>=6.0.1
+
+# --- PDF / Document Processing ---
+pypdf>=4.2.0
+python-docx>=1.1.0
+
+# --- Data Handling ---
+pandas>=2.2.2
+
+# --- API Layer (v1.1+) ---
+fastapi>=0.111.0
+uvicorn>=0.30.0
+
+# --- Validation & Models ---
+pydantic>=2.7.0

@@ -1,0 +1,3 @@
+We are looking for a Backend Developer (Java / Microservices).
+Must have Spring Boot, microservices, REST API, Spring Cloud Gateway, Kafka, Docker.
+Nice to have: Kubernetes, Redis, Feign Client, CI/CD (Jenkins).

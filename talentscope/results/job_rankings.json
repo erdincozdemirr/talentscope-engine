@@ -1,0 +1,94 @@
+{
+  "engine": "TalentScope",
+  "timestamp": "2025-12-16T11:28:00.526508",
+  "job": {
+    "job_file": "job.txt",
+    "domains_detected": [
+      {
+        "domain": "backend_java",
+        "label": "Backend Developer (Java / Microservices)"
+      }
+    ],
+    "minimum_threshold_job_fit_score": 30.0
+  },
+  "pool": {
+    "cv_dir": "C:\\Users\\eozdemir.ext\\PycharmProjects\\talentscope-engine\\talentscope\\data\\cv_pool",
+    "total_cvs_scanned": 1,
+    "qualified_cvs": 1,
+    "qualified_salary_known": 0,
+    "qualified_salary_unknown": 1,
+    "rejected_cvs": 0
+  },
+  "results": {
+    "salary_known_topN": [],
+    "salary_unknown_topN": [
+      {
+        "candidate_id": "erdinc_ozdemir_cv",
+        "candidate_file": "erdinc_ozdemir_cv.pdf",
+        "job_domains": [
+          {
+            "domain": "backend_java",
+            "label": "Backend Developer (Java / Microservices)"
+          }
+        ],
+        "overall_cv_score": 90,
+        "domain_cv_score_for_job": 88,
+        "job_match_percent": 86.96,
+        "job_fit_score": 76.52,
+        "salary_known": false,
+        "salary_min_tl": null,
+        "salary_max_tl": null,
+        "salary_mid_tl": null,
+        "top_matched_terms": [
+          [
+            "microservices",
+            10
+          ],
+          [
+            "spring boot",
+            10
+          ],
+          [
+            "spring cloud",
+            8
+          ],
+          [
+            "java",
+            6
+          ],
+          [
+            "rest api",
+            6
+          ],
+          [
+            "kafka",
+            5
+          ],
+          [
+            "docker",
+            4
+          ],
+          [
+            "kubernetes",
+            4
+          ],
+          [
+            "redis",
+            4
+          ],
+          [
+            "jenkins",
+            3
+          ]
+        ],
+        "top_missing_terms": [
+          [
+            "spring cloud gateway",
+            9
+          ]
+        ],
+        "rank": 1
+      }
+    ]
+  }
+}
