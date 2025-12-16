@@ -135,7 +135,21 @@ If you prefer running the Python application locally (e.g., for debugging), foll
 
 ---
 
-## 📡 API Usage Guide
+## � Service Access & Credentials (Docker Defaults)
+
+When running via `docker-compose`, the services are pre-configured with the following credentials.
+
+| Service | Port (Host) | URL / Connection String | Username | Password | Database / Bucket |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **API (Swagger)** | `8000` | [http://localhost:8000/docs](http://localhost:8000/docs) | - | - | - |
+| **MinIO Console** | `9001` | [http://localhost:9001](http://localhost:9001) | `minioadmin` | `minioadmin` | `cvs`, `jobs` |
+| **MinIO API** | `9000` | `http://localhost:9000` | `minioadmin` | `minioadmin` | - |
+| **PostgreSQL** | `5432` | `postgresql://user:password@localhost:5432/talentscope` | `user` | `password` | `talentscope` |
+| **MongoDB** | `27017` | `mongodb://localhost:27017/` | - | - | `talentscope_matches` |
+
+---
+
+## �📡 API Usage Guide
 
 ### 1. Upload a Job Description
 **Endpoint:** `POST /jobs/upload`
