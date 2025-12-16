@@ -11,12 +11,20 @@ from talentscope.io.salary import append_salary_to_csv
 from talentscope.core.parser import CVParser
 from talentscope.io.extractors import extract_resume_text
 from talentscope.skills.skills_loader import load_yaml
+from talentscope.io.minio_client import minio_client
+from talentscope.db.mongo_client import mongo_client
+from talentscope.config import SwaggerConfig, MinioConfig
+from talentscope.db.database import init_db, SessionLocal
+from talentscope.db.models import Job, Candidate
 import json
 
+# Init DB Tables on Import (or use startup event)
+init_db()
+
 app = FastAPI(
-    title="TalentScope API",
-    description="API for TalentScope Engine: Job Matching & Candidate Ranking",
-    version="1.0.0"
+    title=SwaggerConfig.TITLE,
+    description=SwaggerConfig.DESCRIPTION,
+    version=SwaggerConfig.VERSION
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,17 +33,19 @@ JOBS_DIR = BASE_DIR / "jobs"
 CV_DIR = DATA_DIR / "cv_pool"
 SALARIES_CSV = DATA_DIR / "salaries.csv"
 JSON_RESULTS_DIR = CV_DIR / "json_results"
+JSON_JOBS_RESULTS_DIR = JOBS_DIR / "json_results"
 
 JOBS_DIR.mkdir(parents=True, exist_ok=True)
 CV_DIR.mkdir(parents=True, exist_ok=True, mode=0o755)
 JSON_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+JSON_JOBS_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @app.post("/jobs/upload", summary="Upload a job description file")
 async def upload_job_description(file: UploadFile = File(...)):
     """
     Uploads a job description file (.txt, .pdf, .docx) to the server.
-    The file will be saved in the 'jobs' directory with a timestamp to avoid conflicts.
+    Parses the JD and returns structured JSON (Seniority, Tech Stack, etc.).
     """
     filename = file.filename
     if not filename:
@@ -62,16 +72,72 @@ async def upload_job_description(file: UploadFile = File(...)):
     try:
         with destination_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        
+        # MinIO Upload
+        minio_client.upload_file(MinioConfig.BUCKET_JOBS, str(destination_path), safe_filename)
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File save error: {str(e)}")
 
-    return {
-        "status": "success",
-        "message": "File uploaded successfully",
-        "original_filename": filename,
-        "saved_filename": safe_filename,
-        "file_path": str(destination_path)
-    }
+    # Parse JD
+    from talentscope.io.extractors import extract_file_content
+    from talentscope.core.job_parser import JobParser as JobParserImpl # Alias to avoid confusion if any
+    
+    try:
+        raw_text = extract_file_content(str(destination_path))
+        parser = JobParserImpl(raw_text, filename=safe_filename)
+        parsed_data = parser.parse()
+        
+        # Save JSON
+        json_filename = Path(safe_filename).stem + ".json"
+        json_path = JSON_JOBS_RESULTS_DIR / json_filename
+        
+        with json_path.open("w", encoding="utf-8") as jf:
+            json.dump(parsed_data, jf, indent=2, ensure_ascii=False)
+            
+        # DB Save (Job)
+        try:
+            db = SessionLocal()
+            # Flattening logic
+            sen = parsed_data.get("seniority", {})
+            elig = parsed_data.get("eligibility", {})
+            work = elig.get("work_model", {})
+            edu = parsed_data.get("education", {})
+            
+            job_obj = Job(
+                file_name=safe_filename,
+                title=parsed_data.get("job_title"),
+                job_family=parsed_data.get("job_family"),
+                job_track=parsed_data.get("job_track"),
+                seniority_level=sen.get("target_level"),
+                min_xp=sen.get("min_years_experience"),
+                education_level=edu.get("degree_level_min"),
+                military_required=elig.get("military_service", {}).get("required", False),
+                work_model=work.get("type"),
+                full_json=parsed_data
+            )
+            db.add(job_obj)
+            db.commit()
+            db.refresh(job_obj)
+            db.close()
+        except Exception as e:
+            # Check if duplicate error (unique filename) or connection error
+            # Log but don't fail the request completely?
+            print(f"DB Insert Error (Job): {e}")
+
+        return {
+            "status": "success",
+            "message": "Job Description uploaded and parsed successfully",
+            "saved_filename": safe_filename,
+            "parsed_data": parsed_data
+        }
+
+    except Exception as e:
+         return {
+             "status": "partial_success",
+             "message": f"Job uploaded but parsing failed: {str(e)}",
+             "saved_filename": safe_filename
+         }
 
 
 @app.post("/cv/upload", summary="Upload a CV, parse it, and return structured data")
@@ -106,6 +172,10 @@ async def upload_cv(
     try:
         with destination_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+            
+        # MinIO Upload
+        minio_client.upload_file(MinioConfig.BUCKET_CVS, str(destination_path), filename)
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File save error: {str(e)}")
         
@@ -139,28 +209,77 @@ async def upload_cv(
                 items = dv.get("items") or []
                 if not items: continue
                 
-                compiled = compile_patterns(items)
-                _, matched_list = score_text(norm_text, items, compiled)
-                for canon, _, _ in matched_list:
-                    found_skills.add(canon)
-                    
-            parsed_data["skills"] = sorted(list(found_skills))
+                pat = compile_patterns(items)
+                matched_scores, _ = score_text(norm_text, items, pat) # score_text returns (score, matched_list)
+                if matched_scores > 0: # Check if any skills matched
+                    for term in items:
+                        # This check is a bit simplistic, ideally use the matched_list from score_text
+                        # For now, adhering to the provided snippet's logic
+                        if term.lower() in norm_text:
+                            found_skills.add(term)
+                            
+            parsed_data["skills"] = list(found_skills)
             
+        # Experience Estimation
+        from talentscope.core.experience import estimate_experience_years
+        est_exp = estimate_experience_years(raw_text)
+        parsed_data["estimated_experience"] = est_exp
+        
         # Inject Salary
-        parsed_data["salary"] = salary_expectation  # Use the input directly if available
+        parsed_data["salary"] = salary_expectation
 
-        # 4. Save JSON Result
+        
+        # Save JSON Result
         json_filename = path_obj.stem + ".json"
         json_path = JSON_RESULTS_DIR / json_filename
         
         with json_path.open("w", encoding="utf-8") as jf:
             json.dump(parsed_data, jf, indent=2, ensure_ascii=False)
+            
+        # DB Save (Candidate)
+        try:
+            db = SessionLocal()
+            # Flattening Logic
+            p_data = parsed_data # Use parsed_data directly
+            
+            contact = p_data.get("contact", {})
+            edu_list = p_data.get("education", [])
+            last_school = edu_list[0].get("school") if edu_list else None
+            last_degree = edu_list[0].get("degree") if edu_list else None
+            
+            exp_list = p_data.get("experience", [])
+            curr_title = exp_list[0].get("title") if exp_list else None
+            curr_company = exp_list[0].get("company") if exp_list else None
+            
+            # Skills Array
+            skill_list = parsed_data.get("skills", [])
+            
+            cand_obj = Candidate(
+                file_name=filename,
+                name=contact.get("name"),
+                email=contact.get("email"),
+                phone=contact.get("phone"),
+                location=None, # Parser might not extract location yet
+                school=last_school,
+                degree=last_degree,
+                current_title=curr_title,
+                current_company=curr_company,
+                total_experience_years=est_exp,
+                salary_expectation=salary_expectation,
+                skills=skill_list,
+                full_json=parsed_data
+            )
+            db.add(cand_obj)
+            db.commit()
+            db.close()
+        except Exception as e:
+            print(f"DB Insert Error (Candidate): {e}")
 
         return {
             "status": "success",
-            "message": "CV uploaded and parsed successfully",
-            "filename": filename,
-            "parsed_data": parsed_data
+            "message": "CV uploaded and processed successfully",
+            "results_saved_to": str(json_path),
+            "data": parsed_data
         }
 
     except Exception as e:
@@ -345,6 +464,28 @@ async def match_candidates(req: JobMatchRequest):
 
     top_10 = final_selection
     
+    # MongoDB Insert (Top 10 Matches)
+    try:
+        match_docs = []
+        for idx, cand in enumerate(top_10):
+            match_doc = {
+                "job_id": req.job_filename,
+                "candidate_id": cand.get("candidate_id") or cand.get("file_name"), # Fallback if key differs
+                "rank": idx + 1,
+                "match_score": cand.get("job_fit_score"),
+                "hr_score": cand.get("hr_score"),
+                "estimated_experience": cand.get("estimated_experience"),
+                "salary_expectation": cand.get("salary"),
+                "timestamp": datetime.now(),
+                "details": cand # Include full candidate match details
+            }
+            match_docs.append(match_doc)
+            
+        mongo_client.insert_match_results(match_docs)
+    except Exception as e:
+        # Just log locally, don't interrupt response
+        print(f"Mongo Match Insert Error: {e}")
+
     return {
         "status": "success",
         "fallback_triggered": is_fallback,
@@ -392,6 +533,53 @@ async def get_cv_result(filename: str):
     
     if not file_path.exists():
         raise HTTPException(status_code=404, detail=f"CV result not found: {filename}")
+        
+    try:
+        with file_path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading JSON file: {str(e)}")
+
+
+@app.get("/jobs/results", summary="List all parsed Job JSON results")
+async def list_job_results():
+    """
+    Lists all parsed Job Description data (JSON files) available in 'jobs/json_results'.
+    """
+    if not JSON_JOBS_RESULTS_DIR.exists():
+        return []
+
+    files = []
+    for f in JSON_JOBS_RESULTS_DIR.iterdir():
+        if f.is_file() and f.suffix.lower() == ".json":
+            stat = f.stat()
+            files.append({
+                "filename": f.name,
+                "size_bytes": stat.st_size,
+                "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                "path": str(f)
+            })
+    
+    # Sort by creation time descending
+    files.sort(key=lambda x: x["created_at"], reverse=True)
+    return files
+
+
+@app.get("/jobs/results/{filename}", summary="Get parsed data for a specific Job Description")
+async def get_job_result(filename: str):
+    """
+    Returns the structured JSON data for a specific Job Description.
+    Filename can be provided with or without .json extension.
+    Example: 'backend_job_timestamp.json'
+    """
+    if not filename.endswith(".json"):
+        filename += ".json"
+        
+    file_path = JSON_JOBS_RESULTS_DIR / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Job result not found: {filename}")
         
     try:
         with file_path.open("r", encoding="utf-8") as f:

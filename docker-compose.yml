@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # --- PostgreSQL Service ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: talentscope-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: talentscope
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker_data/postgres:/var/lib/postgresql/data
+    networks:
+      - talentscope-net
+
+  # --- MongoDB Service ---
+  mongo:
+    image: mongo:6.0
+    container_name: talentscope-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./docker_data/mongo:/data/db
+    networks:
+      - talentscope-net
+
+  # --- MinIO Service (S3 Compatible Storage) ---
+  minio:
+    image: minio/minio
+    container_name: talentscope-minio
+    command: server /data --console-address ":9001"
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./docker_data/minio:/data
+    networks:
+      - talentscope-net
+
+  # --- API Service (TalentScope Engine) ---
+  api:
+    build: .
+    container_name: talentscope-api
+    restart: on-failure
+    depends_on:
+      - postgres
+      - mongo
+      - minio
+    ports:
+      - "8000:8000"
+    environment:
+      # Database Connection Strings (Using service names)
+      DATABASE_URL: postgresql://user:password@postgres:5432/talentscope
+      MONGO_URI: mongodb://mongo:27017/
+      MONGO_DB_NAME: talentscope_matches
+      
+      # MinIO Configuration
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_SECURE: "False"
+      
+      # App Settings
+      PYTHONUNBUFFERED: 1
+    volumes:
+      # Mount source code for hot reload (optional, mostly for dev)
+      - ./talentscope:/app/talentscope
+      # Persist uploaded files on host as well (Jobs & CVs)
+      - ./jobs:/app/jobs
+      - ./data:/app/data
+    networks:
+      - talentscope-net
+
+networks:
+  talentscope-net:
+    driver: bridge
