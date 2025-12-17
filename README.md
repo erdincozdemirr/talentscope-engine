@@ -4,7 +4,7 @@
 
 Unlike traditional keyword scanners, TalentScope acts as a transparent **Decision Support System** for HR teams. It ingests CVs and Job Descriptions, parses them into structured data, applies complex "Turkish HR Practice" scoring rules, and provides a diversity-focused shortlist of candidates.
 
----
+---asd
 
 ## 🏗 System Architecture
 
